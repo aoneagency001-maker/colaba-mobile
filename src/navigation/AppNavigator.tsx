@@ -109,16 +109,6 @@ function CustomerTabs() {
         }}
       />
       <Tab.Screen
-        name="Stores"
-        component={StoresScreen}
-        options={{
-          title: 'Магазины',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="store" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{

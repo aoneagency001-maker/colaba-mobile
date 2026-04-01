@@ -176,12 +176,12 @@ export default function WalletScreen({ navigation }: Props) {
 
           <TouchableOpacity
             style={styles.quickAction}
-            onPress={() => navigation.getParent()?.navigate('Stores')}
+            onPress={() => navigation.getParent()?.navigate('Profile')}
           >
             <View style={styles.quickIconCircle}>
-              <MaterialCommunityIcons name="store" size={22} color={colors.primary} />
+              <MaterialCommunityIcons name="account" size={22} color={colors.primary} />
             </View>
-            <Text style={styles.quickActionLabel}>Магазины</Text>
+            <Text style={styles.quickActionLabel}>Профиль</Text>
           </TouchableOpacity>
         </View>
       </View>
