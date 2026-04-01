@@ -1,13 +1,85 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Alert, Platform } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, StyleSheet, Alert, Platform, Animated, Easing } from 'react-native';
 import { Text, TextInput, Button, Card, SegmentedButtons } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '../../services/api';
 import { Customer, Wallet } from '../../types';
 import { colors, spacing, borderRadius } from '../../theme';
+import BonusPicker from '../../components/BonusPicker';
 
 type OperationType = 'accrual' | 'debit';
+
+function formatTenge(value: number): string {
+  return Math.round(value).toLocaleString('ru-RU');
+}
+
+/* ===== UX 10: Success Overlay ===== */
+function SuccessOverlay({
+  amount,
+  customerName,
+  onDismiss,
+}: {
+  amount: number;
+  customerName: string;
+  onDismiss: () => void;
+}) {
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 4,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+
+    const timer = setTimeout(onDismiss, 2500);
+    return () => clearTimeout(timer);
+  }, [onDismiss, scaleAnim]);
+
+  return (
+    <View style={overlayStyles.overlay}>
+      <Animated.View
+        style={[overlayStyles.checkCircle, { transform: [{ scale: scaleAnim }] }]}
+      >
+        <MaterialCommunityIcons name="check" size={48} color="#FFFFFF" />
+      </Animated.View>
+      <Text style={overlayStyles.overlayAmount}>+{formatTenge(amount)} тг</Text>
+      <Text style={overlayStyles.overlayName}>{customerName}</Text>
+    </View>
+  );
+}
+
+const overlayStyles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  checkCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: colors.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  overlayAmount: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: spacing.sm,
+  },
+  overlayName: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.8)',
+  },
+});
 
 interface ScannedCustomer {
   customer: Customer;
@@ -23,6 +95,10 @@ export default function ScannerScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [manualId, setManualId] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
+  const [successInfo, setSuccessInfo] = useState<{
+    amount: number;
+    customerName: string;
+  } | null>(null);
 
   const handleScan = async (customerId: string) => {
     try {
@@ -64,16 +140,17 @@ export default function ScannerScreen() {
         amount: parseFloat(amount),
       });
 
-      const msg = opType === 'accrual'
-        ? `Начислено ${amount} ₸`
-        : `Списано ${amount} ₸`;
+      const customerName = [
+        scannedData.customer.user?.firstName,
+        scannedData.customer.user?.lastName,
+      ]
+        .filter(Boolean)
+        .join(' ') || 'Клиент';
 
-      if (Platform.OS === 'web') {
-        alert(msg);
-      } else {
-        Alert.alert('Успех', msg);
-      }
-
+      setSuccessInfo({
+        amount: parseFloat(amount),
+        customerName,
+      });
       setScannedData(null);
       setAmount('');
     } catch (err: any) {
@@ -121,16 +198,25 @@ export default function ScannerScreen() {
             ]}
           />
 
-          <TextInput
-            label="Сумма (₸)"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="numeric"
-            mode="outlined"
-            style={styles.input}
-            outlineColor={colors.textMuted}
-            activeOutlineColor={opType === 'accrual' ? colors.success : colors.accent}
-          />
+          {/* UX 9: BonusPicker for debit, TextInput for accrual */}
+          {opType === 'debit' ? (
+            <BonusPicker
+              maxBonus={wallet.balance}
+              value={amount ? parseFloat(amount) : 0}
+              onChange={(val) => setAmount(String(val))}
+            />
+          ) : (
+            <TextInput
+              label="Сумма (₸)"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="numeric"
+              mode="outlined"
+              style={styles.input}
+              outlineColor={colors.textMuted}
+              activeOutlineColor={colors.success}
+            />
+          )}
 
           {opType === 'debit' && parseFloat(amount) > wallet.balance && (
             <Text style={styles.warning}>Сумма превышает баланс клиента</Text>
@@ -159,6 +245,14 @@ export default function ScannerScreen() {
   // Scanner view
   return (
     <View style={styles.container}>
+      {/* UX 10: Success Overlay */}
+      {successInfo && (
+        <SuccessOverlay
+          amount={successInfo.amount}
+          customerName={successInfo.customerName}
+          onDismiss={() => setSuccessInfo(null)}
+        />
+      )}
       <View style={styles.scannerArea}>
         {scanning ? (
           permission?.granted ? (

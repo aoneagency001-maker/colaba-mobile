@@ -54,6 +54,7 @@ function CustomerTabs() {
         tabBarInactiveTintColor: colors.textMuted,
         headerStyle: { backgroundColor: colors.bg },
         headerTitleStyle: { color: colors.text, fontWeight: '700' },
+        tabBarStyle: { height: 60, paddingBottom: 6 },
       }}
     >
       <Tab.Screen
@@ -74,6 +75,36 @@ function CustomerTabs() {
           title: 'История',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="history" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="QRTab"
+        component={QrCodeScreen}
+        options={{
+          title: 'QR-код',
+          headerShown: true,
+          headerTintColor: colors.primary,
+          tabBarLabel: '',
+          tabBarIcon: () => (
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: colors.accent,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 20,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
+              }}
+            >
+              <MaterialCommunityIcons name="qrcode" size={28} color="#fff" />
+            </View>
           ),
         }}
       />
