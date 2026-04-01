@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, borderRadius } from '../../theme';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }: any) {
   const { user, customer, logout } = useAuthStore();
 
   const handleCopyReferral = async () => {
@@ -82,6 +82,32 @@ export default function ProfileScreen() {
         </Card>
       )}
 
+      {/* Actions */}
+      <Card style={styles.card}>
+        <Card.Content style={{ paddingHorizontal: 0 }}>
+          <List.Item
+            title="Мои заказы"
+            left={(props) => <List.Icon {...props} icon="clipboard-list-outline" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigation.navigate('OrderHistory')}
+          />
+          <Divider />
+          <List.Item
+            title="Редактировать профиль"
+            left={(props) => <List.Icon {...props} icon="account-edit-outline" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigation.navigate('EditProfile')}
+          />
+          <Divider />
+          <List.Item
+            title="Новости"
+            left={(props) => <List.Icon {...props} icon="newspaper-variant-outline" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigation.navigate('News')}
+          />
+        </Card.Content>
+      </Card>
+
       {/* Settings */}
       <Card style={styles.card}>
         <Card.Content style={{ paddingHorizontal: 0 }}>
@@ -89,6 +115,7 @@ export default function ProfileScreen() {
             title="Уведомления"
             left={(props) => <List.Icon {...props} icon="bell-outline" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigation.navigate('NotificationSettings')}
           />
           <Divider />
           <List.Item

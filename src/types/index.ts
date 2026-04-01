@@ -110,3 +110,71 @@ export interface RegisterData {
   password: string;
   referralCode?: string;
 }
+
+// ─── Catalog / Cart / Orders / News (ported from StalFed) ───
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+  sortOrder: number;
+  parentId?: string;
+  children?: Category[];
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  composition?: string;
+  price: number;
+  unit?: string;
+  categoryId: string;
+  category?: Category;
+  bonusType: 'percent' | 'fixed';
+  bonusValue: number;
+  bonusMultiplier: number;
+  images: string[];
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  totalAmount: number;
+  bonusDiscount: number;
+  finalAmount: number;
+  totalBonusEarned: number;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  items: OrderItem[];
+  createdAt: string;
+}
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+  unit: string;
+  bonusEarned: number;
+}
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  content: string;
+  previewImageUrl?: string;
+  category: 'promo' | 'event' | 'update';
+  publishedAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  totalPages: number;
+}

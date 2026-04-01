@@ -166,7 +166,7 @@ export default function WalletScreen({ navigation }: Props) {
 
           <TouchableOpacity
             style={styles.quickAction}
-            onPress={() => navigation.getParent()?.navigate('History')}
+            onPress={() => navigation.navigate('History')}
           >
             <View style={styles.quickIconCircle}>
               <MaterialCommunityIcons name="history" size={22} color={colors.primary} />
@@ -216,7 +216,7 @@ export default function WalletScreen({ navigation }: Props) {
           <Text style={styles.sectionTitle}>Последние операции</Text>
           <Button
             mode="text"
-            onPress={() => navigation.getParent()?.navigate('History')}
+            onPress={() => navigation.navigate('History')}
             textColor={colors.primary}
             compact
           >

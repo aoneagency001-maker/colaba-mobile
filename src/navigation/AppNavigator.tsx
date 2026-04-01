@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/auth';
+import { useCartStore } from '../store/cart';
 import { UserRole } from '../types';
 import { colors } from '../theme';
 
@@ -15,9 +16,17 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 import WalletScreen from '../screens/customer/WalletScreen';
 import HistoryScreen from '../screens/customer/HistoryScreen';
 import QrCodeScreen from '../screens/customer/QrCodeScreen';
-import StoresScreen from '../screens/customer/StoresScreen';
 import ProfileScreen from '../screens/customer/ProfileScreen';
 import ExpiringScreen from '../screens/customer/ExpiringScreen';
+import CatalogScreen from '../screens/customer/CatalogScreen';
+import ProductDetailScreen from '../screens/customer/ProductDetailScreen';
+import CartScreen from '../screens/customer/CartScreen';
+import CheckoutScreen from '../screens/customer/CheckoutScreen';
+import NewsScreen from '../screens/customer/NewsScreen';
+import NewsDetailScreen from '../screens/customer/NewsDetailScreen';
+import OrderHistoryScreen from '../screens/customer/OrderHistoryScreen';
+import EditProfileScreen from '../screens/customer/EditProfileScreen';
+import NotificationSettingsScreen from '../screens/customer/NotificationSettingsScreen';
 
 // Seller screens
 import ScannerScreen from '../screens/seller/ScannerScreen';
@@ -26,27 +35,101 @@ import SellerProfileScreen from '../screens/seller/SellerProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-const CustomerStack = createNativeStackNavigator();
+const CatalogStackNav = createNativeStackNavigator();
+const WalletStackNav = createNativeStackNavigator();
+const CartStackNav = createNativeStackNavigator();
+const ProfileStackNav = createNativeStackNavigator();
 
-function CustomerWalletStack() {
+// ─── Catalog Stack ───
+function CatalogStack() {
   return (
-    <CustomerStack.Navigator screenOptions={{ headerShown: false }}>
-      <CustomerStack.Screen name="WalletMain" component={WalletScreen} />
-      <CustomerStack.Screen
+    <CatalogStackNav.Navigator screenOptions={{ headerShown: false }}>
+      <CatalogStackNav.Screen name="CatalogMain" component={CatalogScreen} />
+      <CatalogStackNav.Screen
+        name="ProductDetail"
+        component={ProductDetailScreen}
+        options={{ headerShown: true, title: 'Товар', headerTintColor: colors.primary }}
+      />
+    </CatalogStackNav.Navigator>
+  );
+}
+
+// ─── Wallet Stack ───
+function WalletStack() {
+  return (
+    <WalletStackNav.Navigator screenOptions={{ headerShown: false }}>
+      <WalletStackNav.Screen name="WalletMain" component={WalletScreen} />
+      <WalletStackNav.Screen
         name="QrCode"
         component={QrCodeScreen}
         options={{ headerShown: true, title: 'QR-код', headerTintColor: colors.primary }}
       />
-      <CustomerStack.Screen
+      <WalletStackNav.Screen
         name="Expiring"
         component={ExpiringScreen}
         options={{ headerShown: true, title: 'Сгорающие бонусы', headerTintColor: colors.primary }}
       />
-    </CustomerStack.Navigator>
+      <WalletStackNav.Screen
+        name="History"
+        component={HistoryScreen}
+        options={{ headerShown: true, title: 'История', headerTintColor: colors.primary }}
+      />
+    </WalletStackNav.Navigator>
   );
 }
 
+// ─── Cart Stack ───
+function CartStack() {
+  return (
+    <CartStackNav.Navigator screenOptions={{ headerShown: false }}>
+      <CartStackNav.Screen name="CartMain" component={CartScreen} />
+      <CartStackNav.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ headerShown: true, title: 'Оформление заказа', headerTintColor: colors.primary }}
+      />
+    </CartStackNav.Navigator>
+  );
+}
+
+// ─── Profile Stack ───
+function ProfileStack() {
+  return (
+    <ProfileStackNav.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStackNav.Screen name="ProfileMain" component={ProfileScreen} />
+      <ProfileStackNav.Screen
+        name="OrderHistory"
+        component={OrderHistoryScreen}
+        options={{ headerShown: true, title: 'Мои заказы', headerTintColor: colors.primary }}
+      />
+      <ProfileStackNav.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ headerShown: true, title: 'Редактировать профиль', headerTintColor: colors.primary }}
+      />
+      <ProfileStackNav.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+        options={{ headerShown: true, title: 'Уведомления', headerTintColor: colors.primary }}
+      />
+      <ProfileStackNav.Screen
+        name="News"
+        component={NewsScreen}
+        options={{ headerShown: true, title: 'Новости', headerTintColor: colors.primary }}
+      />
+      <ProfileStackNav.Screen
+        name="NewsDetail"
+        component={NewsDetailScreen}
+        options={{ headerShown: true, title: 'Новость', headerTintColor: colors.primary }}
+      />
+    </ProfileStackNav.Navigator>
+  );
+}
+
+// ─── Customer Tabs (5 tabs) ───
 function CustomerTabs() {
+  const itemCount = useCartStore((s) => s.itemCount());
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -58,23 +141,24 @@ function CustomerTabs() {
       }}
     >
       <Tab.Screen
+        name="CatalogTab"
+        component={CatalogStack}
+        options={{
+          headerShown: false,
+          title: 'Каталог',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="store" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Wallet"
-        component={CustomerWalletStack}
+        component={WalletStack}
         options={{
           headerShown: false,
           title: 'Кошелёк',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="wallet" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="History"
-        component={HistoryScreen}
-        options={{
-          title: 'История',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="history" size={size} color={color} />
           ),
         }}
       />
@@ -109,9 +193,22 @@ function CustomerTabs() {
         }}
       />
       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="CartTab"
+        component={CartStack}
         options={{
+          headerShown: false,
+          title: 'Корзина',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cart" size={size} color={color} />
+          ),
+          tabBarBadge: itemCount > 0 ? itemCount : undefined,
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStack}
+        options={{
+          headerShown: false,
           title: 'Профиль',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="account" size={size} color={color} />
