@@ -186,30 +186,15 @@ function AuthStack() {
 }
 
 export default function AppNavigator() {
-  const { isAuthenticated, isLoading, role, checkAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, role, login, checkAuth } = useAuthStore();
 
+  // TODO: убрать автологин, вернуть авторизацию
   useEffect(() => {
-    checkAuth();
+    if (!isAuthenticated) {
+      login('+77001234567', 'test123').catch(() => {});
+    }
   }, []);
 
-  if (isLoading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <AuthStack />;
-  }
-
-  if (role === UserRole.SELLER) {
-    return <SellerTabs />;
-  }
-
-  // ADMIN and COMPANY_ADMIN would use the web admin panel
-  // If they somehow end up in the mobile app, show customer tabs
   return <CustomerTabs />;
 }
 
