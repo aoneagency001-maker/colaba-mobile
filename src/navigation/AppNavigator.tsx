@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/auth';
-import { useCartStore } from '../store/cart';
 import { UserRole } from '../types';
 import { colors } from '../theme';
 
@@ -38,6 +37,7 @@ const Tab = createBottomTabNavigator();
 const CatalogStackNav = createNativeStackNavigator();
 const WalletStackNav = createNativeStackNavigator();
 const CartStackNav = createNativeStackNavigator();
+const NewsStackNav = createNativeStackNavigator();
 const ProfileStackNav = createNativeStackNavigator();
 
 // ─── Catalog Stack ───
@@ -49,6 +49,16 @@ function CatalogStack() {
         name="ProductDetail"
         component={ProductDetailScreen}
         options={{ headerShown: true, title: 'Товар', headerTintColor: colors.primary }}
+      />
+      <CatalogStackNav.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{ headerShown: true, title: 'Корзина', headerTintColor: colors.primary }}
+      />
+      <CatalogStackNav.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ headerShown: true, title: 'Оформление заказа', headerTintColor: colors.primary }}
       />
     </CatalogStackNav.Navigator>
   );
@@ -92,6 +102,20 @@ function CartStack() {
   );
 }
 
+// ─── News Stack ───
+function NewsStack() {
+  return (
+    <NewsStackNav.Navigator screenOptions={{ headerShown: false }}>
+      <NewsStackNav.Screen name="NewsMain" component={NewsScreen} />
+      <NewsStackNav.Screen
+        name="NewsDetail"
+        component={NewsDetailScreen}
+        options={{ headerShown: true, title: 'Новость', headerTintColor: colors.primary }}
+      />
+    </NewsStackNav.Navigator>
+  );
+}
+
 // ─── Profile Stack ───
 function ProfileStack() {
   return (
@@ -112,24 +136,12 @@ function ProfileStack() {
         component={NotificationSettingsScreen}
         options={{ headerShown: true, title: 'Уведомления', headerTintColor: colors.primary }}
       />
-      <ProfileStackNav.Screen
-        name="News"
-        component={NewsScreen}
-        options={{ headerShown: true, title: 'Новости', headerTintColor: colors.primary }}
-      />
-      <ProfileStackNav.Screen
-        name="NewsDetail"
-        component={NewsDetailScreen}
-        options={{ headerShown: true, title: 'Новость', headerTintColor: colors.primary }}
-      />
     </ProfileStackNav.Navigator>
   );
 }
 
 // ─── Customer Tabs (5 tabs) ───
 function CustomerTabs() {
-  const itemCount = useCartStore((s) => s.itemCount());
-
   return (
     <Tab.Navigator
       screenOptions={{
@@ -156,9 +168,9 @@ function CustomerTabs() {
         component={WalletStack}
         options={{
           headerShown: false,
-          title: 'Кошелёк',
+          title: 'Бонусы',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="wallet" size={size} color={color} />
+            <MaterialCommunityIcons name="star" size={size} color={color} />
           ),
         }}
       />
@@ -193,15 +205,14 @@ function CustomerTabs() {
         }}
       />
       <Tab.Screen
-        name="CartTab"
-        component={CartStack}
+        name="NewsTab"
+        component={NewsStack}
         options={{
           headerShown: false,
-          title: 'Корзина',
+          title: 'Новости',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cart" size={size} color={color} />
+            <MaterialCommunityIcons name="newspaper" size={size} color={color} />
           ),
-          tabBarBadge: itemCount > 0 ? itemCount : undefined,
         }}
       />
       <Tab.Screen
