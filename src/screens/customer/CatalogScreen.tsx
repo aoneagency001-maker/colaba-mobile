@@ -200,7 +200,15 @@ function ProductList({ categoryId, categoryName, onBack, navigation }: {
 }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState('');
   const addItem = useCartStore((s) => s.addItem);
+  const cartCount = useCartStore((s) => s.itemCount)();
+
+  const handleAdd = (item: Product) => {
+    addItem(item);
+    setToast(`${item.name.substring(0, 25)}... добавлен`);
+    setTimeout(() => setToast(''), 2000);
+  };
 
   useEffect(() => {
     (async () => {
@@ -254,7 +262,7 @@ function ProductList({ categoryId, categoryName, onBack, navigation }: {
                   </View>
                 </View>
               </View>
-              <TouchableOpacity style={s.addBtn} onPress={() => addItem(item)}>
+              <TouchableOpacity style={s.addBtn} onPress={() => handleAdd(item)}>
                 <MaterialCommunityIcons name="cart-plus" size={20} color={colors.primary} />
               </TouchableOpacity>
             </TouchableOpacity>
@@ -269,6 +277,23 @@ function ProductList({ categoryId, categoryName, onBack, navigation }: {
           )
         }
       />
+
+      {/* Toast notification */}
+      {toast !== '' && (
+        <View style={s.toast}>
+          <MaterialCommunityIcons name="check-circle" size={18} color="#fff" />
+          <Text style={s.toastText}> {toast}</Text>
+        </View>
+      )}
+
+      {/* Floating cart */}
+      {cartCount > 0 && (
+        <TouchableOpacity style={s.floatingCart} onPress={() => navigation.navigate('Cart')} activeOpacity={0.8}>
+          <MaterialCommunityIcons name="cart" size={20} color="#fff" />
+          <Text style={s.floatingCartText}>Корзина ({cartCount})</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#fff" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -490,6 +515,10 @@ const s = StyleSheet.create({
   // Search
   searchHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: colors.borderLight },
   searchBarActive: { flex: 1, backgroundColor: colors.bgLight, borderRadius: 10, height: 42 },
+
+  // Toast
+  toast: { position: 'absolute', top: 60, left: 20, right: 20, backgroundColor: colors.bonusGreen, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 5, zIndex: 100 },
+  toastText: { color: '#fff', fontWeight: '600', fontSize: 14 },
 
   emptyText: { color: colors.textMuted, marginTop: 8, textAlign: 'center' },
 });
