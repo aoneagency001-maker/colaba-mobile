@@ -10,20 +10,53 @@ import { colors } from '../../theme';
 const formatPrice = (v: number) => new Intl.NumberFormat('ru-RU').format(v);
 
 // ─── Иконки и цвета для категорий ───
-const CAT_META: Record<string, { icon: string; color: string }> = {
-  'Сортовой прокат': { icon: 'iron-board', color: '#5C6BC0' },
-  'Листовой прокат': { icon: 'rectangle-outline', color: '#26A69A' },
-  'Трубный прокат': { icon: 'pipe', color: '#EF6C00' },
-  'Фасонный прокат': { icon: 'alpha-i-box-outline', color: '#8D6E63' },
-  'Нержавеющий прокат': { icon: 'shield-star', color: '#78909C' },
-  'Трубопроводная арматура': { icon: 'valve', color: '#EC407A' },
-  'Метизы': { icon: 'screw-round-top', color: '#7E57C2' },
-  'Сэндвич-панели': { icon: 'layers-triple', color: '#FF7043' },
-  'Запорная арматура': { icon: 'valve', color: '#AB47BC' },
+const IMG_BASE = 'http://colaba.5.35.107.85.nip.io/images';
+
+// Фото категорий с stalfed.kz
+const CAT_IMAGES: Record<string, string> = {
+  'Сортовой прокат': `${IMG_BASE}/catalog_stal-armaturnaya-a-iii.png`,
+  'Листовой прокат': `${IMG_BASE}/catalog_list-goryachekatanyj-s-rifleniem.png`,
+  'Трубный прокат': `${IMG_BASE}/cat_truba_vgp.png`,
+  'Фасонный прокат': `${IMG_BASE}/catalog_balka-dvutavrovaya.png`,
+  'Нержавеющий прокат': `${IMG_BASE}/cat_nerzh_truba.png`,
+  'Трубопроводная арматура': `${IMG_BASE}/catalog_poluotvod-30.png`,
+  'Метизы': `${IMG_BASE}/cat_elektrody.png`,
+  'Сэндвич-панели': `${IMG_BASE}/catalog_sehndvich-paneli.png`,
 };
 
-function getMeta(name: string) {
-  return CAT_META[name] || { icon: 'package-variant', color: '#607D8B' };
+// Фото подкатегорий
+const SUBCAT_IMAGES: Record<string, string> = {
+  'Арматура': `${IMG_BASE}/sortovoy_armatura.jpg`,
+  'Катанка / Круг': `${IMG_BASE}/sortovoy_katanka.jpg`,
+  'Квадрат': `${IMG_BASE}/sortovoy_kvadrat.jpg`,
+  'Полоса стальная': `${IMG_BASE}/sortovoy_polosa.png`,
+  'Шестигранник': `${IMG_BASE}/sortovoy_shestigrannik.png`,
+  'Лист горячекатаный': `${IMG_BASE}/cat_list_gk.png`,
+  'Лист холоднокатаный': `${IMG_BASE}/catalog_list-holodnokatannyj.png`,
+  'Лист рифлёный': `${IMG_BASE}/catalog_list-goryachekatanyj-s-rifleniem.png`,
+  'Лист оцинкованный': `${IMG_BASE}/catalog_proflist-ocinkovannyj.png`,
+  'Профнастил': `${IMG_BASE}/cat_profnastil.png`,
+  'Лист ПВЛ': `${IMG_BASE}/cat_list_pvl.png`,
+  'Лист нержавеющий': `${IMG_BASE}/cat_nerzh_list.png`,
+  'Труба профильная': `${IMG_BASE}/catalog_cataloque_aljuminievajaprofilnajatruba.jpg`,
+  'Труба ВГП': `${IMG_BASE}/cat_truba_vgp.png`,
+  'Труба электросварная': `${IMG_BASE}/cat_truba_esv.jpg`,
+  'Труба бесшовная': `${IMG_BASE}/catalog_truba-besshovnaya-goryachedeformirovannaya.png`,
+  'Труба НКТ': `${IMG_BASE}/cat_truba_nkt.jpg`,
+  'Балка двутавровая': `${IMG_BASE}/cat_balka.png`,
+  'Швеллер': `${IMG_BASE}/cat_shveller.png`,
+  'Уголок равнополочный': `${IMG_BASE}/catalog_ugolok-stalnoj-ravnopolochnyj.png`,
+  'Уголок неравнополочный': `${IMG_BASE}/catalog_ugolok-neravnopolochnyj.png`,
+  'Отвод 90°': `${IMG_BASE}/catalog_poluotvod-30.png`,
+  'Тройник': `${IMG_BASE}/catalog_trojnik.png`,
+  'Переход': `${IMG_BASE}/catalog_perehod.png`,
+  'Проволока': `${IMG_BASE}/catalog_provoloka.png`,
+  'Сетка': `${IMG_BASE}/cat_setka.png`,
+  'Электроды': `${IMG_BASE}/cat_elektrody.png`,
+};
+
+function getCatImage(name: string) {
+  return CAT_IMAGES[name] || SUBCAT_IMAGES[name] || null;
 }
 
 // ═══════════════════════════════════════
@@ -78,7 +111,7 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
         {/* Categories grid */}
         <View style={s.catGrid}>
           {categories.map((cat) => {
-            const meta = getMeta(cat.name);
+            const imgUrl = getCatImage(cat.name);
             const subCount = cat.children?.length || 0;
             return (
               <TouchableOpacity
@@ -87,9 +120,13 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
                 onPress={() => onSelect(cat)}
                 activeOpacity={0.7}
               >
-                <View style={[s.catIcon, { backgroundColor: meta.color + '15' }]}>
-                  <MaterialCommunityIcons name={meta.icon as any} size={26} color={meta.color} />
-                </View>
+                {imgUrl ? (
+                  <Image source={{ uri: imgUrl }} style={s.catImage} resizeMode="cover" />
+                ) : (
+                  <View style={[s.catImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                    <MaterialCommunityIcons name="package-variant" size={28} color="#ccc" />
+                  </View>
+                )}
                 <Text style={s.catName} numberOfLines={2}>{cat.name}</Text>
                 {subCount > 0 && (
                   <Text style={s.catCount}>{subCount} подкат.</Text>
@@ -164,9 +201,13 @@ function SubcategoryList({ category, onSelect, onBack }: {
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         renderItem={({ item }) => (
           <TouchableOpacity style={s.subCard} onPress={() => onSelect(item)} activeOpacity={0.7}>
-            <View style={[s.subIcon, { backgroundColor: meta.color + '12' }]}>
-              <MaterialCommunityIcons name={meta.icon as any} size={22} color={meta.color} />
-            </View>
+            {getCatImage(item.name) ? (
+              <Image source={{ uri: getCatImage(item.name)! }} style={s.subImage} resizeMode="cover" />
+            ) : (
+              <View style={[s.subImage, { backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center' }]}>
+                <MaterialCommunityIcons name="folder" size={20} color="#ccc" />
+              </View>
+            )}
             <View style={s.subBody}>
               <Text style={s.subName}>{item.name}</Text>
             </View>
@@ -468,6 +509,7 @@ const s = StyleSheet.create({
     borderColor: colors.borderLight,
     marginBottom: 2,
   },
+  catImage: { width: '100%', height: 80, borderRadius: 10, marginBottom: 10, backgroundColor: '#f5f5f5' },
   catIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   catName: { fontWeight: '600', fontSize: 13, color: colors.text, lineHeight: 17 },
   catCount: { color: colors.textMuted, fontSize: 11, marginTop: 3 },
@@ -490,6 +532,7 @@ const s = StyleSheet.create({
 
   // Subcategory
   subCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight },
+  subImage: { width: 48, height: 48, borderRadius: 10, marginRight: 12, backgroundColor: '#f5f5f5' },
   subIcon: { width: 42, height: 42, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   subBody: { flex: 1 },
   subName: { fontWeight: '600', fontSize: 15, color: colors.text },
