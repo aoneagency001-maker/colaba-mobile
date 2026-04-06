@@ -124,14 +124,16 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
                 {imgUrl ? (
                   <Image source={{ uri: imgUrl }} style={s.catImage} resizeMode="cover" />
                 ) : (
-                  <View style={[s.catImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                  <View style={[s.catImage, { justifyContent: 'center', alignItems: 'center' }]}>
                     <MaterialCommunityIcons name="package-variant" size={28} color="#ccc" />
                   </View>
                 )}
-                <Text style={s.catName} numberOfLines={2}>{cat.name}</Text>
-                {subCount > 0 && (
-                  <Text style={s.catCount}>{subCount} подкат.</Text>
-                )}
+                <View style={s.catTextWrap}>
+                  <Text style={s.catName} numberOfLines={2}>{cat.name}</Text>
+                  {subCount > 0 && (
+                    <Text style={s.catCount}>{subCount} подкат.</Text>
+                  )}
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -503,16 +505,17 @@ const s = StyleSheet.create({
   catCard: {
     width: '47%',
     backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.borderLight,
     marginBottom: 2,
   },
-  catImage: { width: '100%', height: 80, borderRadius: 10, marginBottom: 10, backgroundColor: '#f5f5f5' },
+  catImage: { width: '100%', height: 90, backgroundColor: '#eee' },
   catIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
-  catName: { fontWeight: '600', fontSize: 13, color: colors.text, lineHeight: 17 },
-  catCount: { color: colors.textMuted, fontSize: 11, marginTop: 3 },
+  catTextWrap: { padding: 10 },
+  catName: { fontWeight: '700', fontSize: 13, color: colors.text, lineHeight: 17 },
+  catCount: { color: colors.textMuted, fontSize: 11, marginTop: 2 },
 
   // Popular
   popularCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 16, borderRadius: 12, padding: 10, marginBottom: 8, borderWidth: 1, borderColor: colors.borderLight },
