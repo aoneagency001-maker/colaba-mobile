@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../../services/api';
 import { Product, Category } from '../../types';
 import { useCartStore } from '../../store/cart';
-import { useAuthStore } from '../../store/auth';
 import { colors } from '../../theme';
 
 const formatPrice = (v: number) => new Intl.NumberFormat('ru-RU').format(v);
@@ -28,58 +27,117 @@ function getMeta(name: string) {
 }
 
 // ═══════════════════════════════════════
-// Вид 1: Главная — сетка категорий
+// Вид 1: Главная — сетка категорий + популярное
 // ═══════════════════════════════════════
-function CategoryGrid({ categories, onSelect, balance, onSearch }: {
-  categories: Category[]; onSelect: (cat: Category) => void; balance: number; onSearch: () => void;
+function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }: {
+  categories: Category[]; onSelect: (cat: Category) => void; onSearch: () => void; cartCount: number; onCartPress: () => void;
 }) {
+  const [popular, setPopular] = useState<Product[]>([]);
+  const addItem = useCartStore((s) => s.addItem);
+
+  useEffect(() => {
+    api.get('/products', { params: { limit: 6 } }).then(({ data }) => {
+      setPopular(data.items || []);
+    }).catch(() => {});
+  }, []);
+
   return (
-    <ScrollView style={s.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      {/* Header */}
-      <View style={s.header}>
-        <View>
-          <Text style={s.headerTitle}>Colaba</Text>
-          <Text style={s.headerSub}>Каталог металлопроката</Text>
-        </View>
-        <View style={s.balancePill}>
-          <MaterialCommunityIcons name="star" size={14} color="#ffd54f" />
-          <Text style={s.balanceText}> {formatPrice(Number(balance))} тг</Text>
-        </View>
-      </View>
-
-      {/* Search */}
-      <TouchableOpacity onPress={onSearch} activeOpacity={0.8}>
-        <View style={s.searchFake}>
-          <MaterialCommunityIcons name="magnify" size={20} color="#999" />
-          <Text style={s.searchFakeText}>Поиск по каталогу...</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Categories grid */}
-      <Text style={s.sectionLabel}>Категории</Text>
-      <View style={s.catGrid}>
-        {categories.map((cat) => {
-          const meta = getMeta(cat.name);
-          const subCount = cat.children?.length || 0;
-          return (
-            <TouchableOpacity
-              key={cat.id}
-              style={s.catCard}
-              onPress={() => onSelect(cat)}
-              activeOpacity={0.7}
-            >
-              <View style={[s.catIcon, { backgroundColor: meta.color + '15' }]}>
-                <MaterialCommunityIcons name={meta.icon as any} size={28} color={meta.color} />
-              </View>
-              <Text style={s.catName} numberOfLines={2}>{cat.name}</Text>
-              {subCount > 0 && (
-                <Text style={s.catCount}>{subCount} подкат.</Text>
+    <View style={s.container}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        {/* Header */}
+        <View style={s.heroHeader}>
+          <View style={s.heroTop}>
+            <View>
+              <Text style={s.heroTitle}>StalFed</Text>
+              <Text style={s.heroSub}>Металлопрокат по всему Казахстану</Text>
+            </View>
+            <TouchableOpacity style={s.cartBtn} onPress={onCartPress}>
+              <MaterialCommunityIcons name="cart-outline" size={22} color="#fff" />
+              {cartCount > 0 && (
+                <View style={s.cartBadge}>
+                  <Text style={s.cartBadgeText}>{cartCount}</Text>
+                </View>
               )}
             </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ScrollView>
+          </View>
+
+          {/* Search inside hero */}
+          <TouchableOpacity onPress={onSearch} activeOpacity={0.8}>
+            <View style={s.heroSearch}>
+              <MaterialCommunityIcons name="magnify" size={20} color="#999" />
+              <Text style={s.heroSearchText}>Арматура, лист, труба...</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Filters row */}
+        <View style={s.filterRow}>
+          <Text style={s.sectionLabel}>Каталог</Text>
+        </View>
+
+        {/* Categories grid */}
+        <View style={s.catGrid}>
+          {categories.map((cat) => {
+            const meta = getMeta(cat.name);
+            const subCount = cat.children?.length || 0;
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                style={s.catCard}
+                onPress={() => onSelect(cat)}
+                activeOpacity={0.7}
+              >
+                <View style={[s.catIcon, { backgroundColor: meta.color + '15' }]}>
+                  <MaterialCommunityIcons name={meta.icon as any} size={26} color={meta.color} />
+                </View>
+                <Text style={s.catName} numberOfLines={2}>{cat.name}</Text>
+                {subCount > 0 && (
+                  <Text style={s.catCount}>{subCount} подкат.</Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Popular section */}
+        {popular.length > 0 && (
+          <>
+            <Text style={[s.sectionLabel, { marginTop: 24 }]}>Популярные товары</Text>
+            {popular.map((item) => (
+              <View key={item.id} style={s.popularCard}>
+                {item.images?.[0] ? (
+                  <Image source={{ uri: item.images[0] }} style={s.popularImg} />
+                ) : (
+                  <View style={[s.popularImg, s.prodImagePlaceholder]}>
+                    <MaterialCommunityIcons name="image-off" size={20} color="#ccc" />
+                  </View>
+                )}
+                <View style={s.popularBody}>
+                  <Text style={s.popularName} numberOfLines={1}>{item.name}</Text>
+                  {Number(item.price) > 0 ? (
+                    <Text style={s.popularPrice}>{formatPrice(Number(item.price))} тг</Text>
+                  ) : (
+                    <Text style={s.prodPriceRequest}>Цена по запросу</Text>
+                  )}
+                </View>
+                <TouchableOpacity style={s.addBtn} onPress={() => addItem(item)}>
+                  <MaterialCommunityIcons name="cart-plus" size={18} color={colors.primary} />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </>
+        )}
+      </ScrollView>
+
+      {/* Floating cart bar */}
+      {cartCount > 0 && (
+        <TouchableOpacity style={s.floatingCart} onPress={onCartPress} activeOpacity={0.8}>
+          <MaterialCommunityIcons name="cart" size={20} color="#fff" />
+          <Text style={s.floatingCartText}>Корзина ({cartCount})</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#fff" />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -295,13 +353,11 @@ export default function CatalogScreen({ navigation }: any) {
   const [selectedCat, setSelectedCat] = useState<Category | null>(null);
   const [selectedSubId, setSelectedSubId] = useState<string>('');
   const [selectedSubName, setSelectedSubName] = useState<string>('');
-  const _user = useAuthStore((s) => s.user);
+  const cartCount = useCartStore((s) => s.itemCount)();
 
   useEffect(() => {
     api.get('/categories').then(({ data }) => setCategories(data)).catch(() => {});
   }, []);
-
-  const balance = 0;
 
   if (screen === 'search') {
     return <SearchView onBack={() => setScreen('categories')} navigation={navigation} />;
@@ -338,7 +394,8 @@ export default function CatalogScreen({ navigation }: any) {
   return (
     <CategoryGrid
       categories={categories}
-      balance={Number(balance)}
+      cartCount={cartCount}
+      onCartPress={() => navigation.navigate('Cart')}
       onSelect={(cat) => {
         setSelectedCat(cat);
         if (cat.children && cat.children.length > 0) {
@@ -360,34 +417,46 @@ export default function CatalogScreen({ navigation }: any) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgLight },
 
-  // Header
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: colors.primary },
-  headerSub: { color: colors.textMuted, fontSize: 12 },
-  balancePill: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20 },
-  balanceText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  // Hero header
+  heroHeader: { backgroundColor: colors.primary, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 18, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
+  heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  heroTitle: { fontSize: 22, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
+  heroSub: { color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 1 },
+  cartBtn: { width: 42, height: 42, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center' },
+  cartBadge: { position: 'absolute', top: -4, right: -4, backgroundColor: colors.accent, width: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
+  cartBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
+  heroSearch: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginTop: 14 },
+  heroSearchText: { color: '#999', marginLeft: 8, fontSize: 14 },
 
-  // Fake search
-  searchFake: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 16, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: colors.border },
-  searchFakeText: { color: '#999', marginLeft: 8, fontSize: 14 },
-
-  // Section
-  sectionLabel: { fontWeight: '700', fontSize: 16, color: colors.text, marginHorizontal: 16, marginTop: 20, marginBottom: 12 },
+  // Section & filter
+  filterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 16 },
+  sectionLabel: { fontWeight: '700', fontSize: 16, color: colors.text, marginHorizontal: 16, marginTop: 16, marginBottom: 10 },
 
   // Categories grid
   catGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 10 },
   catCard: {
     width: '47%',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1,
     borderColor: colors.borderLight,
     marginBottom: 2,
   },
-  catIcon: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  catName: { fontWeight: '700', fontSize: 14, color: colors.text, lineHeight: 18 },
-  catCount: { color: colors.textMuted, fontSize: 11, marginTop: 4 },
+  catIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+  catName: { fontWeight: '600', fontSize: 13, color: colors.text, lineHeight: 17 },
+  catCount: { color: colors.textMuted, fontSize: 11, marginTop: 3 },
+
+  // Popular
+  popularCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 16, borderRadius: 12, padding: 10, marginBottom: 8, borderWidth: 1, borderColor: colors.borderLight },
+  popularImg: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#f5f5f5', marginRight: 10 },
+  popularBody: { flex: 1 },
+  popularName: { fontWeight: '600', fontSize: 13, color: colors.text },
+  popularPrice: { fontWeight: '700', fontSize: 14, color: colors.primary, marginTop: 2 },
+
+  // Floating cart
+  floatingCart: { position: 'absolute', bottom: 16, left: 16, right: 16, backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 8 },
+  floatingCartText: { color: '#fff', fontWeight: '700', fontSize: 15, flex: 1, marginLeft: 10 },
 
   // Back header
   backHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: colors.borderLight },
