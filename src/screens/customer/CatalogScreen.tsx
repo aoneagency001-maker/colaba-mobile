@@ -184,7 +184,6 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
 function SubcategoryList({ category, onSelect, onBack }: {
   category: Category; onSelect: (sub: Category) => void; onBack: () => void;
 }) {
-  const meta = getMeta(category.name);
   const subs = category.children || [];
 
   return (
@@ -215,14 +214,14 @@ function SubcategoryList({ category, onSelect, onBack }: {
           </TouchableOpacity>
         )}
         ListHeaderComponent={
-          <TouchableOpacity style={[s.subCard, { backgroundColor: meta.color + '08' }]} onPress={() => onSelect(category)} activeOpacity={0.7}>
-            <View style={[s.subIcon, { backgroundColor: meta.color + '20' }]}>
-              <MaterialCommunityIcons name="view-grid" size={22} color={meta.color} />
+          <TouchableOpacity style={[s.subCard, { backgroundColor: colors.primary + '08' }]} onPress={() => onSelect(category)} activeOpacity={0.7}>
+            <View style={[s.subIcon, { backgroundColor: colors.primary + '20' }]}>
+              <MaterialCommunityIcons name="view-grid" size={22} color={colors.primary} />
             </View>
             <View style={s.subBody}>
-              <Text style={[s.subName, { color: meta.color }]}>Все товары</Text>
+              <Text style={[s.subName, { color: colors.primary }]}>Все товары</Text>
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={meta.color} />
+            <MaterialCommunityIcons name="chevron-right" size={20} color={colors.primary} />
           </TouchableOpacity>
         }
         ListEmptyComponent={
