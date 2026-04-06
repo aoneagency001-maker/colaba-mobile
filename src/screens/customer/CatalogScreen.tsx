@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
+import { View, FlatList, StyleSheet, RefreshControl, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Searchbar, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../../services/api';
@@ -174,19 +174,24 @@ function ProductList({ categoryId, categoryName, onBack, navigation }: {
               onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
               activeOpacity={0.7}
             >
-              <View style={s.prodBody}>
-                <Text style={s.prodName} numberOfLines={1}>{item.name}</Text>
-                {item.composition && (
-                  <Text style={s.prodComp}>{item.composition}</Text>
-                )}
-                <View style={s.prodPriceRow}>
-                  <Text style={s.prodPrice}>{formatPrice(Number(item.price))} тг</Text>
-                  <Text style={s.prodUnit}>/ {item.unit}</Text>
+              {item.images && item.images.length > 0 && item.images[0] ? (
+                <Image source={{ uri: item.images[0] }} style={s.prodImage} />
+              ) : (
+                <View style={[s.prodImage, s.prodImagePlaceholder]}>
+                  <MaterialCommunityIcons name="image-off" size={24} color="#ccc" />
                 </View>
+              )}
+              <View style={s.prodBody}>
+                <Text style={s.prodName} numberOfLines={2}>{item.name}</Text>
+                {Number(item.price) > 0 ? (
+                  <Text style={s.prodPrice}>{formatPrice(Number(item.price))} тг{item.unit ? ` / ${item.unit}` : ''}</Text>
+                ) : (
+                  <Text style={s.prodPriceRequest}>Цена по запросу</Text>
+                )}
                 <View style={s.prodBadgeRow}>
                   <View style={[s.badge, isPromo && s.badgePromo]}>
                     <Text style={[s.badgeText, isPromo && s.badgeTextPromo]}>
-                      {item.bonusValue}% кэшбэк{isPromo ? ` x${item.bonusMultiplier}` : ''}
+                      {item.bonusValue}% кэшбэк
                     </Text>
                   </View>
                 </View>
@@ -396,12 +401,15 @@ const s = StyleSheet.create({
   subName: { fontWeight: '600', fontSize: 15, color: colors.text },
 
   // Product card
-  prodCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight },
+  prodCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: colors.borderLight },
+  prodImage: { width: 56, height: 56, borderRadius: 10, marginRight: 12, backgroundColor: '#f5f5f5' },
+  prodImagePlaceholder: { justifyContent: 'center', alignItems: 'center' },
   prodBody: { flex: 1 },
   prodName: { fontWeight: '700', fontSize: 14, color: colors.text },
   prodComp: { color: colors.textMuted, fontSize: 12, marginTop: 1 },
   prodPriceRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: 4 },
-  prodPrice: { fontWeight: '700', fontSize: 15, color: colors.primary },
+  prodPrice: { fontWeight: '700', fontSize: 15, color: colors.primary, marginTop: 3 },
+  prodPriceRequest: { fontSize: 13, color: colors.warning, fontWeight: '600', marginTop: 3 },
   prodUnit: { color: colors.textMuted, fontSize: 12, marginLeft: 3 },
   prodBadgeRow: { marginTop: 5 },
   badge: { backgroundColor: colors.bonusGreenBg, paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6, alignSelf: 'flex-start' },
