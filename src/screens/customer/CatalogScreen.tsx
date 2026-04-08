@@ -67,7 +67,14 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
   categories: Category[]; onSelect: (cat: Category) => void; onSearch: () => void; cartCount: number; onCartPress: () => void;
 }) {
   const [popular, setPopular] = useState<Product[]>([]);
+  const [toast, setToast] = useState('');
   const addItem = useCartStore((s) => s.addItem);
+
+  const handleAddPopular = (item: Product) => {
+    addItem(item);
+    setToast(`${item.name.substring(0, 25)}... добавлен`);
+    setTimeout(() => setToast(''), 2000);
+  };
 
   useEffect(() => {
     api.get('/products', { params: { limit: 6 } }).then(({ data }) => {
@@ -103,6 +110,21 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
             </View>
           </TouchableOpacity>
         </View>
+
+        {/* Bonus card */}
+        <TouchableOpacity style={s.bonusCard} activeOpacity={0.8}>
+          <View style={s.bonusLeft}>
+            <Text style={s.bonusLabel}>Ваш бонус</Text>
+            <Text style={s.bonusAmount}>47 500 <Text style={s.bonusCurrency}>тг</Text></Text>
+          </View>
+          <View style={s.bonusRight}>
+            <View style={s.bonusAvatar}>
+              <Text style={s.bonusAvatarText}>ИП</Text>
+            </View>
+            <Text style={s.bonusName}>Иван Петров</Text>
+            <Text style={s.bonusCompany}>ТОО «АльфаСтрой»</Text>
+          </View>
+        </TouchableOpacity>
 
         {/* Filters row */}
         <View style={s.filterRow}>
@@ -160,7 +182,7 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
                     <Text style={s.prodPriceRequest}>Цена по запросу</Text>
                   )}
                 </View>
-                <TouchableOpacity style={s.addBtn} onPress={() => addItem(item)}>
+                <TouchableOpacity style={s.addBtn} onPress={() => handleAddPopular(item)}>
                   <MaterialCommunityIcons name="cart-plus" size={18} color={colors.primary} />
                 </TouchableOpacity>
               </View>
@@ -168,6 +190,14 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
           </>
         )}
       </ScrollView>
+
+      {/* Toast */}
+      {toast !== '' && (
+        <View style={s.toast}>
+          <MaterialCommunityIcons name="check-circle" size={18} color="#fff" />
+          <Text style={s.toastText}> {toast}</Text>
+        </View>
+      )}
 
       {/* Floating cart bar */}
       {cartCount > 0 && (
@@ -495,6 +525,18 @@ const s = StyleSheet.create({
   cartBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
   heroSearch: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginTop: 14 },
   heroSearchText: { color: '#999', marginLeft: 8, fontSize: 14 },
+
+  // Bonus card
+  bonusCard: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.borderLight, alignItems: 'center' },
+  bonusLeft: { flex: 1 },
+  bonusLabel: { fontSize: 12, color: colors.textMuted },
+  bonusAmount: { fontSize: 28, fontWeight: '800', color: colors.bonusGreen, marginTop: 2 },
+  bonusCurrency: { fontSize: 16, fontWeight: '500', color: colors.textMuted },
+  bonusRight: { alignItems: 'center' },
+  bonusAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
+  bonusAvatarText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  bonusName: { fontSize: 12, fontWeight: '600', color: colors.text },
+  bonusCompany: { fontSize: 10, color: colors.textMuted },
 
   // Section & filter
   filterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 16 },
