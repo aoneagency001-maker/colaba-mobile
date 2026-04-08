@@ -35,15 +35,27 @@ export default function ProfileScreen({ navigation }: any) {
       {/* User Info Card */}
       <Card style={styles.card}>
         <Card.Content style={styles.userSection}>
-          <View style={styles.avatar}>
-            <MaterialCommunityIcons name="account-circle" size={64} color={colors.primary} />
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarText}>ИП</Text>
           </View>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.name}>
-              {user?.firstName} {user?.lastName}
+              {user?.firstName || 'Иван'} {user?.lastName || 'Петров'}
             </Text>
-            <Text style={styles.phone}>{user?.phone}</Text>
-            {user?.email && <Text style={styles.email}>{user.email}</Text>}
+            <Text style={styles.phone}>{user?.phone || '+77001234567'}</Text>
+            <Text style={styles.email}>{user?.email || 'petrov@alfastroy.kz'}</Text>
+            <Text style={styles.company}>ТОО «АльфаСтрой»</Text>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Bonus balance */}
+      <Card style={[styles.card, { backgroundColor: colors.bonusGreenBg }]}>
+        <Card.Content style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MaterialCommunityIcons name="star-circle" size={32} color={colors.bonusGreen} />
+          <View style={{ marginLeft: 12 }}>
+            <Text style={{ fontSize: 12, color: colors.textSecondary }}>Бонусный баланс</Text>
+            <Text style={{ fontSize: 22, fontWeight: '800', color: colors.bonusGreen }}>47 500 тг</Text>
           </View>
         </Card.Content>
       </Card>
@@ -167,6 +179,12 @@ const styles = StyleSheet.create({
   avatar: {
     marginRight: spacing.md,
   },
+  avatarCircle: {
+    width: 52, height: 52, borderRadius: 26, backgroundColor: colors.primary,
+    justifyContent: 'center', alignItems: 'center', marginRight: spacing.md,
+  },
+  avatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },
+  company: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   name: {
     fontSize: 20,
     fontWeight: '700',

@@ -112,19 +112,14 @@ function CategoryGrid({ categories, onSelect, onSearch, cartCount, onCartPress }
         </View>
 
         {/* Bonus card */}
-        <TouchableOpacity style={s.bonusCard} activeOpacity={0.8}>
-          <View style={s.bonusLeft}>
+        <View style={s.bonusCard}>
+          <MaterialCommunityIcons name="star-circle" size={32} color={colors.bonusGreen} />
+          <View style={s.bonusTextWrap}>
             <Text style={s.bonusLabel}>Ваш бонус</Text>
             <Text style={s.bonusAmount}>47 500 <Text style={s.bonusCurrency}>тг</Text></Text>
           </View>
-          <View style={s.bonusRight}>
-            <View style={s.bonusAvatar}>
-              <Text style={s.bonusAvatarText}>ИП</Text>
-            </View>
-            <Text style={s.bonusName}>Иван Петров</Text>
-            <Text style={s.bonusCompany}>ТОО «АльфаСтрой»</Text>
-          </View>
-        </TouchableOpacity>
+          <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+        </View>
 
         {/* Filters row */}
         <View style={s.filterRow}>
@@ -528,15 +523,10 @@ const s = StyleSheet.create({
 
   // Bonus card
   bonusCard: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.borderLight, alignItems: 'center' },
-  bonusLeft: { flex: 1 },
+  bonusTextWrap: { flex: 1, marginLeft: 12 },
   bonusLabel: { fontSize: 12, color: colors.textMuted },
-  bonusAmount: { fontSize: 28, fontWeight: '800', color: colors.bonusGreen, marginTop: 2 },
-  bonusCurrency: { fontSize: 16, fontWeight: '500', color: colors.textMuted },
-  bonusRight: { alignItems: 'center' },
-  bonusAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
-  bonusAvatarText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  bonusName: { fontSize: 12, fontWeight: '600', color: colors.text },
-  bonusCompany: { fontSize: 10, color: colors.textMuted },
+  bonusAmount: { fontSize: 24, fontWeight: '800', color: colors.bonusGreen, marginTop: 1 },
+  bonusCurrency: { fontSize: 14, fontWeight: '500', color: colors.textMuted },
 
   // Section & filter
   filterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 16 },
