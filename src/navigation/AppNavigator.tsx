@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/auth';
+import { useCartStore } from '../store/cart';
 import { UserRole } from '../types';
 import { colors } from '../theme';
 
@@ -142,6 +143,8 @@ function ProfileStack() {
 
 // ─── Customer Tabs (5 tabs) ───
 function CustomerTabs() {
+  const cartCount = useCartStore((s) => s.itemCount)();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -171,6 +174,18 @@ function CustomerTabs() {
           title: 'Бонусы',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="star" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CartTab"
+        component={CartStack}
+        options={{
+          headerShown: false,
+          title: 'Корзина',
+          tabBarBadge: cartCount > 0 ? cartCount : undefined,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cart" size={size} color={color} />
           ),
         }}
       />
