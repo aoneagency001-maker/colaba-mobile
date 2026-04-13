@@ -1,43 +1,15 @@
-import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
-import { Text, Card, Button, IconButton, Divider, TextInput } from 'react-native-paper';
+import React from 'react';
+import { View, FlatList, StyleSheet } from 'react-native';
+import { Text, Card, Button, IconButton, Divider } from 'react-native-paper';
 import { useCartStore } from '../../store/cart';
-import api from '../../services/api';
 import { colors } from '../../theme';
 
 export default function CartScreen({ navigation }: any) {
-  const { items, updateQuantity, removeItem, clearCart, totalAmount, totalBonusEarned } =
+  const { items, updateQuantity, removeItem, totalAmount, totalBonusEarned } =
     useCartStore();
-  const [useBonuses, setUseBonuses] = useState('0');
-  const [loading, setLoading] = useState(false);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('ru-RU').format(price) + ' тг';
-
-  const handleOrder = async () => {
-    setLoading(true);
-    try {
-      const orderItems = items.map((i) => ({
-        productId: i.product.id,
-        quantity: i.quantity,
-      }));
-
-      const bonusAmount = parseInt(useBonuses) || 0;
-
-      await api.post('/orders', {
-        items: orderItems,
-        useBonuses: bonusAmount > 0 ? bonusAmount : undefined,
-      });
-
-      Alert.alert('Заказ создан!', 'Ваш заказ принят в обработку. Бонусы будут начислены после подтверждения.');
-      clearCart();
-      setUseBonuses('0');
-    } catch (e: any) {
-      Alert.alert('Ошибка', e.response?.data?.message || 'Не удалось создать заказ');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (items.length === 0) {
     return (
@@ -61,8 +33,6 @@ export default function CartScreen({ navigation }: any) {
 
   const total = totalAmount();
   const bonusEarned = totalBonusEarned();
-  const bonusUsed = parseInt(useBonuses) || 0;
-  const finalTotal = total - bonusUsed;
 
   return (
     <View style={styles.container}>
@@ -107,32 +77,9 @@ export default function CartScreen({ navigation }: any) {
             <Divider style={styles.divider} />
 
             <View style={styles.row}>
-              <Text variant="bodyLarge">Итого:</Text>
-              <Text variant="titleLarge" style={styles.total}>
-                {formatPrice(total)}
-              </Text>
-            </View>
-
-            <TextInput
-              label="Списать бонусов (тг)"
-              value={useBonuses}
-              onChangeText={setUseBonuses}
-              keyboardType="numeric"
-              mode="outlined"
-              style={styles.bonusInput}
-            />
-
-            {bonusUsed > 0 && (
-              <View style={styles.row}>
-                <Text>Скидка бонусами:</Text>
-                <Text style={styles.discount}>-{formatPrice(bonusUsed)}</Text>
-              </View>
-            )}
-
-            <View style={styles.row}>
-              <Text variant="titleMedium">К оплате:</Text>
+              <Text variant="titleMedium">Итого:</Text>
               <Text variant="headlineSmall" style={styles.finalTotal}>
-                {formatPrice(finalTotal)}
+                {formatPrice(total)}
               </Text>
             </View>
 
@@ -145,7 +92,7 @@ export default function CartScreen({ navigation }: any) {
             <Button
               mode="contained"
               onPress={() => navigation.navigate('Checkout')}
-              disabled={finalTotal <= 0}
+              disabled={total <= 0}
               style={styles.orderButton}
               contentStyle={styles.orderButtonContent}
               buttonColor={colors.accent}
@@ -176,8 +123,6 @@ const styles = StyleSheet.create({
   divider: { marginVertical: 12 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 4 },
   total: { fontWeight: 'bold' },
-  bonusInput: { marginVertical: 12 },
-  discount: { color: colors.accent, fontWeight: 'bold' },
   finalTotal: { fontWeight: 'bold', color: colors.primary },
   bonusEarn: {
     backgroundColor: colors.bonusGreenBg,
